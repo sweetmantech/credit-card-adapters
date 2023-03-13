@@ -12,7 +12,7 @@ pragma solidity ^0.8.10;
 import {IERC721Drop} from "./interfaces/IERC721Drop.sol";
 import {IERC721A} from "@ERC721A/contracts/IERC721A.sol";
 
-contract ZoraCrossmintAdapter {
+contract ChillDropCrossmintAdapter {
     /// @notice mint target ERC721Drop
     /// @param _target ERC721Drop contract address
     /// @param _quantity number of tokens
