@@ -28,7 +28,7 @@ contract LensCrossmintAdapter {
         IWmatic(wMaticAddress).deposit{value: msg.value}();
     }
 
-    /// @notice mint target ERC721Drop
+    /// @notice collect target Lens Publication
     /// @param _vars Lens collect with sig data
     /// @param _to recipient of tokens
     function collectWithSig(
