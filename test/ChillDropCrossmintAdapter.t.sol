@@ -29,8 +29,6 @@ contract ChillDropCrossmintAdapterTest is Test {
         uint256 quantity = 100;
         vm.startPrank(DEFAULT_MINTER);
         uint256 start = drop.purchase(quantity);
-        emit log_string("HELLO");
-        emit log_uint(start);
         adapter.purchase(address(drop), quantity, DEFAULT_MINTER_TWO);
         assertEq(drop.balanceOf(DEFAULT_MINTER), quantity);
         assertEq(drop.ownerOf(1), DEFAULT_MINTER);
