@@ -51,16 +51,33 @@ contract LensCrossmintAdapterTest is Test {
         assertEq(lensHub.balanceOf(DEFAULT_MINTER), 2 * quantity);
     }
 
-    // function testPurchaseMany() public {
-    //     uint256 quantity = 100;
-    //     vm.startPrank(DEFAULT_MINTER);
-    //     uint256 start = drop.purchase(quantity);
-    //     emit log_string("HELLO");
-    //     emit log_uint(start);
-    //     adapter.purchase(address(drop), quantity, DEFAULT_MINTER_TWO);
-    //     assertEq(drop.balanceOf(DEFAULT_MINTER), quantity);
-    //     assertEq(drop.ownerOf(1), DEFAULT_MINTER);
-    //     assertEq(drop.balanceOf(DEFAULT_MINTER_TWO), quantity);
-    //     assertEq(drop.ownerOf(101), DEFAULT_MINTER_TWO);
-    // }
+    function testCollectMany(uint256 quantity) public {
+        if (quantity > 1111 || quantity < 2) {
+            return;
+        }
+        vm.deal(DEFAULT_MINTER, 1 ether);
+        vm.startPrank(DEFAULT_MINTER);
+        bytes memory data = abi.encode(address(wmatic), 1);
+
+        // NORMAL COLLECT DIRECTLY ON LENSHUB
+        uint256 start = lensHub.collect(
+            DEFAULT_PROFILE_ID,
+            DEFAULT_PUB_ID,
+            data
+        );
+        assertEq(lensHub.balanceOf(DEFAULT_MINTER), 1);
+
+        // NEW COLLECT ON ADAPTER
+        adapter.collect{value: 1 ether}(
+            DEFAULT_PROFILE_ID,
+            DEFAULT_PUB_ID,
+            data,
+            quantity,
+            DEFAULT_MINTER_TWO
+        );
+        assertEq(lensHub.balanceOf(DEFAULT_MINTER), 1);
+        assertEq(lensHub.ownerOf(1), DEFAULT_MINTER);
+        assertEq(lensHub.balanceOf(DEFAULT_MINTER_TWO), quantity);
+        assertEq(lensHub.ownerOf(1 + quantity), DEFAULT_MINTER_TWO);
+    }
 }

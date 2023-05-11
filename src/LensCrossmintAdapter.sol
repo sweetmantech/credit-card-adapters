@@ -63,19 +63,15 @@ contract LensCrossmintAdapter {
         wrapMatic();
 
         // Transfer the WMATIC to the user's wallet
-        IERC20 wMaticToken = IERC20(wMaticAddress);
-        uint256 wMaticBalance = wMaticToken.balanceOf(address(this));
-        wMaticToken.transfer(to, wMaticBalance);
+        address nftAddress = ILensHub(lensHubAddress).getCollectNFT(
+            profileId,
+            pubId
+        );
 
         uint256 firstMintedTokenId = ILensHub(lensHubAddress).collect(
             profileId,
             pubId,
             data
-        );
-
-        address nftAddress = ILensHub(lensHubAddress).getCollectNFT(
-            profileId,
-            pubId
         );
         IERC721(nftAddress).safeTransferFrom(
             address(this),
@@ -83,6 +79,16 @@ contract LensCrossmintAdapter {
             firstMintedTokenId,
             bytes("")
         );
+        for (uint256 i = 1; i < quantity; i++) {
+            ILensHub(lensHubAddress).collect(profileId, pubId, data);
+            IERC721(nftAddress).safeTransferFrom(
+                address(this),
+                to,
+                firstMintedTokenId + i,
+                bytes("")
+            );
+        }
+
         return firstMintedTokenId;
     }
 }
