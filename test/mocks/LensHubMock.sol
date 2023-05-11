@@ -24,6 +24,14 @@ contract LensHubMock is ERC721A {
         return address(this);
     }
 
+    /// @notice return collect module address for a publication
+    function getCollectModule(
+        uint256 profileId,
+        uint256 pubId
+    ) external view returns (address) {
+        return address(0x1996);
+    }
+
     /// @notice Getter for last minted token ID (gets next token id and subtracts 1)
     function _lastMintedTokenId() internal view returns (uint256) {
         return _nextTokenId() - 1;

@@ -30,6 +30,40 @@ contract LensCrossmintAdapterTest is Test {
         adapter = new LensCrossmintAdapter(address(lensHub), address(wmatic));
     }
 
+    function testCollect_approvedWMaticCollectModule() public {
+        uint256 quantity = 1;
+        vm.startPrank(DEFAULT_MINTER);
+        vm.deal(DEFAULT_MINTER, 1 ether);
+        bytes memory data = abi.encode(address(wmatic), 1);
+
+        // VERIFY NO ALLOWANCE
+        assertEq(
+            wmatic.allowance(
+                address(adapter),
+                lensHub.getCollectModule(DEFAULT_PROFILE_ID, DEFAULT_PUB_ID)
+            ),
+            0
+        );
+
+        // COLLECT POST
+        adapter.collect{value: 1 ether}(
+            DEFAULT_PROFILE_ID,
+            DEFAULT_PUB_ID,
+            data,
+            1,
+            DEFAULT_MINTER
+        );
+
+        // VERIFY MAX ALLOWANCE
+        assertEq(
+            wmatic.allowance(
+                address(adapter),
+                lensHub.getCollectModule(DEFAULT_PROFILE_ID, DEFAULT_PUB_ID)
+            ),
+            type(uint256).max
+        );
+    }
+
     function testCollect() public {
         uint256 quantity = 1;
         vm.startPrank(DEFAULT_MINTER);
