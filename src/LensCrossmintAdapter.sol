@@ -46,7 +46,7 @@ contract LensCrossmintAdapter {
         ILensHub(lensHubAddress).collectWithSig(_vars);
     }
 
-    /// @notice mint target ERC721Drop
+    /// @notice collect target Lens Publication
     /// @param profileId profile id of seller
     /// @param pubId publication id to collect
     /// @param data encoded collect data
@@ -68,7 +68,38 @@ contract LensCrossmintAdapter {
             pubId
         );
 
-        uint256 firstMintedTokenId = ILensHub(lensHubAddress).collect(
+        // Collect First Publication
+        uint256 firstMintedTokenId = _collect(
+            profileId,
+            pubId,
+            data,
+            nftAddress,
+            to
+        );
+
+        // Collect {X} Publications
+        for (uint256 i = 1; i < quantity; i++) {
+            _collect(profileId, pubId, data, nftAddress, to);
+        }
+
+        // Return First Collected Publication
+        return firstMintedTokenId;
+    }
+
+    /// @notice collect target Lens Publication
+    /// @param profileId profile id of seller
+    /// @param pubId publication id to collect
+    /// @param data encoded collect data
+    /// @param nftAddress collect NFT address
+    /// @param to recipient of tokens
+    function _collect(
+        uint256 profileId,
+        uint256 pubId,
+        bytes memory data,
+        address nftAddress,
+        address to
+    ) internal returns (uint256) {
+        uint256 tokenId = ILensHub(lensHubAddress).collect(
             profileId,
             pubId,
             data
@@ -76,19 +107,10 @@ contract LensCrossmintAdapter {
         IERC721(nftAddress).safeTransferFrom(
             address(this),
             to,
-            firstMintedTokenId,
+            tokenId,
             bytes("")
         );
-        for (uint256 i = 1; i < quantity; i++) {
-            ILensHub(lensHubAddress).collect(profileId, pubId, data);
-            IERC721(nftAddress).safeTransferFrom(
-                address(this),
-                to,
-                firstMintedTokenId + i,
-                bytes("")
-            );
-        }
 
-        return firstMintedTokenId;
+        return tokenId;
     }
 }
