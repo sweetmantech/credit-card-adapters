@@ -59,10 +59,15 @@ contract LensCrossmintAdapter {
         uint256 quantity,
         address to
     ) external payable returns (uint256) {
+        (, uint256 price) = abi.decode(data, (address, uint256));
+
         // Wrap MATIC to WMATIC
         wrapMatic();
 
-        // Transfer the WMATIC to the user's wallet
+        // Approve ERC20 spending
+        _approveSpend(profileId, pubId, price * quantity);
+
+        // Lookup NFT Contract to Collect
         address nftAddress = ILensHub(lensHubAddress).getCollectNFT(
             profileId,
             pubId
@@ -112,5 +117,33 @@ contract LensCrossmintAdapter {
         );
 
         return tokenId;
+    }
+
+    /// @notice approve WMATIC spending
+    /// @param profileId profile id of seller
+    /// @param pubId publication id to collect
+    /// @param totalPrice total amount of ERC20 to spend
+    function _approveSpend(
+        uint256 profileId,
+        uint256 pubId,
+        uint256 totalPrice
+    ) internal returns (uint256) {
+        // COLLECT MODULE SPENDS ERC20
+        address collectModuleAddress = ILensHub(lensHubAddress)
+            .getCollectModule(profileId, pubId);
+
+        // CHECK CURRENT ERC20 ALLOWANCE
+        uint256 allowance = IWmatic(wMaticAddress).allowance(
+            address(this),
+            collectModuleAddress
+        );
+
+        // INCREASE IF INSUFFICIENT
+        if (allowance < totalPrice) {
+            IWmatic(wMaticAddress).approve(
+                collectModuleAddress,
+                type(uint256).max
+            );
+        }
     }
 }
