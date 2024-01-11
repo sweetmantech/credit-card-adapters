@@ -104,11 +104,16 @@ contract LensCrossmintAdapter {
         address nftAddress,
         address to
     ) internal returns (uint256) {
-        uint256 tokenId = ILensHub(lensHubAddress).collect(
-            profileId,
-            pubId,
-            data
+        uint256 tokenId;
+        require(
+            tokenId = ILensHub(lensHubAddress).collect{gas: gasleft()}(
+                profileId,
+                pubId,
+                data
+            ),
+            "Internal call failed"
         );
+
         IERC721(nftAddress).safeTransferFrom(
             address(this),
             to,
