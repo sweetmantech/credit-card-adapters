@@ -19,8 +19,6 @@ contract OasisCrossmintAdapter {
     }
 
     function checkout(
-        address _target,
-        uint256 _quantity,
         address _to,
         Multicall3.Call3Value[] calldata cart
     ) public payable {
