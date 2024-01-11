@@ -1,4 +1,4 @@
 @openzeppelin/=lib/openzeppelin-contracts/
 @ERC721A/=lib/ERC721A/
 @forge-std/=lib/forge-std/
-@zora/=lib/zora/src/
+@multicall/=lib/multicall/src/
