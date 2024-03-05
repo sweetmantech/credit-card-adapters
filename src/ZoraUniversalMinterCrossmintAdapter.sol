@@ -12,8 +12,18 @@ pragma solidity ^0.8.10;
 import {IZoraUniversalMinter} from "./interfaces/IZoraUniversalMinter.sol";
 import {IZoraCreator} from "./interfaces/IZoraCreator.sol";
 
+/// @title Zora Universal Minter Crossmint Adapter
+/// @notice Adapter contract for interacting with Zora's Universal Minter to mint tokens in a batch without fees.
+/// @author sweetman.eth
 contract ZoraUniversalMinterCrossmintAdapter {
-    /// @notice mint using Zora's Universal Minter
+    /// @notice Mints tokens in batch without fees using Zora's Universal Minter.
+    /// @param _universalMinter Address of the Zora Universal Minter contract.
+    /// @param _target Target contract address where tokens will be minted.
+    /// @param _value Ether value to send with each mint function call.
+    /// @param _tokenCount Number of tokens in the collection.
+    /// @param _referral Address to be used as referral in minting process.
+    /// @param _minter Address initiating the mint, usually the minter's address.
+    /// @param _to Address where the minted tokens should be sent.
     function purchase(
         address _universalMinter,
         address _target,
@@ -44,20 +54,27 @@ contract ZoraUniversalMinterCrossmintAdapter {
         );
     }
 
+    /// @notice Generates the calldata for each token to be minted.
+    /// @param count Number of tokens in the ERC1155 collection.
+    /// @param minter Address initiating the mint.
+    /// @param referral Address to be used as referral in the minting process.
+    /// @param to Address where the minted tokens should be sent.
+    /// @param dropContractAddress Target contract address for minting.
+    /// @return calldatas The array of calldata for minting each token.
     function generateCalldatas(
         uint256 count,
         address minter,
         address referral,
         address to,
-        address dropContractAddress // Address of the Zora Drop contract
+        address dropContractAddress
     ) public pure returns (bytes[] memory calldatas) {
         calldatas = new bytes[](count);
         IZoraCreator zoraDrop = IZoraCreator(dropContractAddress);
         bytes4 selector = zoraDrop.mintWithRewards.selector;
-        // Example parameters, adjust based on actual function signature
+
         uint256 quantity = 1;
-        string memory comment = "MAGIC"; // Comment used in the minterArguments
-        bytes memory minterArguments = abi.encode(to, comment);  // Simplified, replace with actual encoding logic if necessary
+        string memory comment = "MAGIC"; 
+        bytes memory minterArguments = abi.encode(to, comment);
         
         for (uint256 i = 0; i < count; i++) {
             uint256 tokenId = i + 1;
