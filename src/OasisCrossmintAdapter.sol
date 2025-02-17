@@ -19,7 +19,7 @@ contract OasisCrossmintAdapter {
     }
 
     function checkout(
-        address _to,
+        address,
         Multicall3.Call3Value[] calldata cart
     ) public payable {
         multicallContract.aggregate3Value{value: msg.value}(cart);
