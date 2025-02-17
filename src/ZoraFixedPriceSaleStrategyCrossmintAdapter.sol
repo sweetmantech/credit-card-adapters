@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 import {ICreatorCommands} from "./interfaces/ICreatorCommands.sol";
 import {IZoraCreator1155} from "./interfaces/IZoraCreator1155.sol";

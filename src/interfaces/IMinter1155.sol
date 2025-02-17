@@ -1,5 +1,5 @@
 // SPDX-License-Identifier: MIT
-pragma solidity ^0.8.17;
+pragma solidity ^0.8.18;
 
 /// @notice Minter standard interface
 /// @dev Minters need to confirm to the ERC165 selector of type(IMinter1155).interfaceId
