@@ -102,7 +102,8 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
             address(mockZora),
             TOKEN_ID,
             QUANTITY,
-            RECIPIENT
+            RECIPIENT,
+            "commented!"
         );
 
         assertEq(mockZora.lastTokenId(), TOKEN_ID);
@@ -124,7 +125,8 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
             address(mockZora),
             TOKEN_ID,
             QUANTITY,
-            RECIPIENT
+            RECIPIENT,
+            "commented!"
         );
     }
 
@@ -138,7 +140,8 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
             address(mockZora),
             TOKEN_ID,
             QUANTITY,
-            RECIPIENT
+            RECIPIENT,
+            "commented!"
         );
     }
 

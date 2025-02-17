@@ -20,14 +20,17 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
     /// @param _tokenId Token ID to mint
     /// @param _quantity Number of tokens to mint
     /// @param _to Recipient address for the minted tokens
+    /// @param _comment The comment to pass to the minter
     function mint(
         address _priceFixedSaleStrategy,
         address _target,
         uint256 _tokenId,
         uint256 _quantity,
-        address _to
+        address _to,
+        string memory _comment
     ) public payable {
-        IFixedPriceSaleStrategy.SaleConfig memory config = getSaleConfig(_priceFixedSaleStrategy, _target, _tokenId);
+        IFixedPriceSaleStrategy.SaleConfig memory config =
+            IFixedPriceSaleStrategy(_priceFixedSaleStrategy).sale(_target, _tokenId);
         
         // Validate sale is active
         if (block.timestamp < config.saleStart || block.timestamp > config.saleEnd) {
@@ -41,7 +44,7 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
         }
 
         // Prepare mint arguments
-        bytes memory mintArgs = abi.encode(_to, "commented!");
+        bytes memory mintArgs = abi.encode(_to, _comment);
 
         IZoraCreator1155(_target).mint{value: msg.value}(
             IMinter1155(_priceFixedSaleStrategy),
@@ -50,19 +53,6 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
             new address[](0),
             mintArgs
         );
-    }
-
-    /// @notice Get the sale configuration for a token
-    /// @param _priceFixedSaleStrategy Address of the Fixed Price Sale Strategy contract
-    /// @param _target Target Zora1155Creator contract address
-    /// @param _tokenId Token ID to get configuration for
-    /// @return config The sale configuration
-    function getSaleConfig(
-        address _priceFixedSaleStrategy,
-        address _target, 
-        uint256 _tokenId
-    ) public view returns (IFixedPriceSaleStrategy.SaleConfig memory config) {
-        return IFixedPriceSaleStrategy(_priceFixedSaleStrategy).sale(_target, _tokenId);
     }
 
     /// @notice Fallback function to receive ETH
