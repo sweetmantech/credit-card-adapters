@@ -57,4 +57,4 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
 
     /// @notice Fallback function to receive ETH
     receive() external payable {}
-} 
+}
