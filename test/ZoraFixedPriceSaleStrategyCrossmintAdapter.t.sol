@@ -98,10 +98,10 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
         uint256 totalPrice = PRICE_PER_TOKEN * QUANTITY;
         
         adapter.mint{value: totalPrice}(
-            address(mockStrategy),
             address(mockZora),
             TOKEN_ID,
             QUANTITY,
+            address(mockStrategy),
             RECIPIENT,
             "commented!"
         );
@@ -121,10 +121,10 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
         
         vm.expectRevert("Mock: forced revert");
         adapter.mint{value: totalPrice}(
-            address(mockStrategy),
             address(mockZora),
             TOKEN_ID,
             QUANTITY,
+            address(mockStrategy),
             RECIPIENT,
             "commented!"
         );
@@ -136,10 +136,10 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
         
         vm.expectRevert("Mock: forced revert");
         adapter.mint{value: totalPrice}(
-            address(mockStrategy),
             address(mockZora),
             TOKEN_ID,
             QUANTITY,
+            address(mockStrategy),
             RECIPIENT,
             "commented!"
         );
