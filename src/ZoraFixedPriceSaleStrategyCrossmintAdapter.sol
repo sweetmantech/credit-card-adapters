@@ -15,22 +15,22 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
     error SaleNotActive();
 
     /// @notice Mint tokens using the Fixed Price Sale Strategy
-    /// @param _priceFixedSaleStrategy Address of the Fixed Price Sale Strategy contract
-    /// @param _target Target Zora1155Creator contract address
-    /// @param _tokenId Token ID to mint
-    /// @param _quantity Number of tokens to mint
-    /// @param _to Recipient address for the minted tokens
-    /// @param _comment The comment to pass to the minter
+    /// @param tokenContract Target Zora1155Creator contract address
+    /// @param tokenId Token ID to mint
+    /// @param quantity Number of tokens to mint
+    /// @param priceFixedSaleStrategy Address of the Fixed Price Sale Strategy contract
+    /// @param to Recipient address for the minted tokens
+    /// @param comment The comment to pass to the minter
     function mint(
-        address _priceFixedSaleStrategy,
-        address _target,
-        uint256 _tokenId,
-        uint256 _quantity,
-        address _to,
-        string memory _comment
+        address tokenContract,
+        uint256 tokenId,
+        uint256 quantity,
+        address priceFixedSaleStrategy,
+        address to,
+        string memory comment
     ) public payable {
         IFixedPriceSaleStrategy.SaleConfig memory config =
-            IFixedPriceSaleStrategy(_priceFixedSaleStrategy).sale(_target, _tokenId);
+            IFixedPriceSaleStrategy(priceFixedSaleStrategy).sale(tokenContract, tokenId);
         
         // Validate sale is active
         if (block.timestamp < config.saleStart || block.timestamp > config.saleEnd) {
@@ -38,18 +38,18 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
         }
 
         // Calculate total price
-        uint256 totalPrice = uint256(config.pricePerToken) * _quantity;
+        uint256 totalPrice = uint256(config.pricePerToken) * quantity;
         if (msg.value < totalPrice) {
             revert InsufficientFunds();
         }
 
         // Prepare mint arguments
-        bytes memory mintArgs = abi.encode(_to, _comment);
+        bytes memory mintArgs = abi.encode(to, comment);
 
-        IZoraCreator1155(_target).mint{value: msg.value}(
-            IMinter1155(_priceFixedSaleStrategy),
-            _tokenId,
-            _quantity,
+        IZoraCreator1155(tokenContract).mint{value: msg.value}(
+            IMinter1155(priceFixedSaleStrategy),
+            tokenId,
+            quantity,
             new address[](0),
             mintArgs
         );
