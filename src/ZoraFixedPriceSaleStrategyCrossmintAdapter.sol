@@ -15,7 +15,7 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
     error SaleNotActive();
 
     /// @notice Mint tokens using the Fixed Price Sale Strategy
-    /// @param tokenContract Target Zora1155Creator contract address
+    /// @param tokenContract Zora1155Creator contract address
     /// @param tokenId Token ID to mint
     /// @param quantity Number of tokens to mint
     /// @param priceFixedSaleStrategy Address of the Fixed Price Sale Strategy contract
