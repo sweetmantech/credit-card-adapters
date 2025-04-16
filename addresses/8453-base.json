@@ -1,3 +1,4 @@
 {
-    "ZoraFixedPriceSaleStrategyCrossmintAdapter": "0x8409abdf1e1e321faa9aadaa9a99cb7d3ff51917"
+    "ZoraFixedPriceSaleStrategyCrossmintAdapter": "0x8409abdf1e1e321faa9aadaa9a99cb7d3ff51917",
+    "ZoraERC20MinterCrossmintAdapter": "0x5A6540cf3409EeC6bAeF8B5Abac6b4F78a55127d"
 }
