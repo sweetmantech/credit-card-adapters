@@ -16,79 +16,99 @@ contract Manifold1155CrossmintAdapter is ERC1155Holder {
     event IncomingEthValue(uint256 price, uint256 fee, uint256 totalAmount);
 
     uint256 public constant MINT_FEE = 0.0005 ether;
-
     address private owner;
+
+    struct SwapData {
+        address swapFactory;
+        address swapRouter;
+        address quoterV2;
+        address tokenIn;
+        uint24 fee;
+    }
+
+    struct MintData {
+        address extensionContract;
+        address creatorContractAddress;
+        uint256 instanceId;
+        uint16 mintCount;
+        uint32[] mintIndices;
+        bytes32[][] merkleProofs;
+    }
 
     constructor() {
         owner = msg.sender;
     }
 
-    function mint(
-        address swapFactory,
-        address swapRouter,
-        address quoterV2,
-        address tokenIn,
-        uint24 fee,
-        address extensionContract,
-        address creatorContractAddress,
-        uint256 instanceId,
-        uint16 mintCount,
-        uint32[] calldata mintIndices,
-        bytes32[][] calldata merkleProofs,
-        address to
-    ) public payable {
-        IERC1155LazyPayableClaim.Claim memory claim =
-            IERC1155LazyPayableClaim(extensionContract).getClaim(creatorContractAddress, instanceId);
+    function mint(SwapData memory swapData, MintData memory mintData, address to) public payable {
+        IERC1155LazyPayableClaim.Claim memory claim = IERC1155LazyPayableClaim(mintData.extensionContract).getClaim(
+            mintData.creatorContractAddress, mintData.instanceId
+        );
 
         bool isErc20Token = claim.erc20 != address(0);
 
-        uint256 totalMintFee = MINT_FEE * mintCount;
-        uint256 totalClaimPrice = claim.cost * mintCount;
+        uint256 totalMintFee = MINT_FEE * mintData.mintCount;
+        uint256 totalClaimPrice = claim.cost * mintData.mintCount;
 
         if (isErc20Token) {
-            address pool = IUniswapV3Factory(swapFactory).getPool(tokenIn, claim.erc20, fee);
-            uint160 liquidity = IUniswapV3Pool(pool).liquidity();
-
-            IQuoterV2.QuoteExactOutputSingleParams memory quoteExactOutputParams = IQuoterV2
-                .QuoteExactOutputSingleParams({
-                tokenIn: tokenIn,
-                tokenOut: claim.erc20,
-                amount: totalClaimPrice,
-                fee: fee,
-                sqrtPriceLimitX96: liquidity
-            });
-            uint256 amountIn;
-            uint160 sqrtPriceX96After;
-            uint32 initializedTicksCrossed;
-            uint256 gasEstimate;
-
-            (amountIn, sqrtPriceX96After, initializedTicksCrossed, gasEstimate) =
-                IQuoterV2(quoterV2).quoteExactOutputSingle(quoteExactOutputParams);
-
-            require(msg.value >= amountIn, "Insufficient ETH");
-            IWETH9(tokenIn).approve(swapRouter, amountIn);
-            ISwapRouter02.ExactOutputSingleParams memory params = ISwapRouter02.ExactOutputSingleParams({
-                tokenIn: tokenIn,
-                tokenOut: claim.erc20,
-                fee: fee,
-                recipient: address(this),
-                amountOut: totalClaimPrice,
-                amountInMaximum: amountIn,
-                sqrtPriceLimitX96: liquidity
-            });
-            ISwapRouter02(swapRouter).exactOutputSingle{value: amountIn}(params);
-            IERC20(claim.erc20).approve(extensionContract, totalClaimPrice);
-            require(msg.value > amountIn + totalMintFee, "Insuffient ETH");
+            uint256 amountIn = handleErc20Mint(swapData, claim.erc20, totalClaimPrice);
+            IERC20(claim.erc20).approve(mintData.extensionContract, totalClaimPrice);
+            require(msg.value > amountIn + totalMintFee, "Insufficient ETH");
             emit IncomingEthValue(amountIn, totalMintFee, amountIn + totalMintFee);
         } else {
             require(msg.value > totalClaimPrice + totalMintFee, "Insufficient ETH");
             emit IncomingEthValue(totalClaimPrice, totalMintFee, totalClaimPrice + totalMintFee);
         }
 
-        IERC1155LazyPayableClaim(extensionContract).mintBatch{value: totalMintFee}(
-            creatorContractAddress, instanceId, mintCount, mintIndices, merkleProofs, address(this)
+        mintBatch(mintData, claim.tokenId, to, totalMintFee);
+    }
+
+    function handleErc20Mint(SwapData memory swapData, address tokenOut, uint256 amountOut)
+        internal
+        returns (uint256)
+    {
+        address pool = IUniswapV3Factory(swapData.swapFactory).getPool(swapData.tokenIn, tokenOut, swapData.fee);
+        uint160 liquidity = IUniswapV3Pool(pool).liquidity();
+
+        IQuoterV2.QuoteExactOutputSingleParams memory quoteExactOutputParams = IQuoterV2.QuoteExactOutputSingleParams({
+            tokenIn: swapData.tokenIn,
+            tokenOut: tokenOut,
+            amount: amountOut,
+            fee: swapData.fee,
+            sqrtPriceLimitX96: liquidity
+        });
+        uint256 amountIn;
+        uint160 sqrtPriceX96After;
+        uint32 initializedTicksCrossed;
+        uint256 gasEstimate;
+
+        (amountIn, sqrtPriceX96After, initializedTicksCrossed, gasEstimate) =
+            IQuoterV2(swapData.quoterV2).quoteExactOutputSingle(quoteExactOutputParams);
+
+        require(msg.value >= amountIn, "Insufficient ETH");
+        IWETH9(swapData.tokenIn).approve(swapData.swapRouter, amountIn);
+        ISwapRouter02.ExactOutputSingleParams memory params = ISwapRouter02.ExactOutputSingleParams({
+            tokenIn: swapData.tokenIn,
+            tokenOut: tokenOut,
+            fee: swapData.fee,
+            recipient: address(this),
+            amountOut: amountOut,
+            amountInMaximum: amountIn,
+            sqrtPriceLimitX96: liquidity
+        });
+        ISwapRouter02(swapData.swapRouter).exactOutputSingle{value: amountIn}(params);
+        return msg.value - amountIn;
+    }
+
+    function mintBatch(MintData memory mintData, uint256 tokenId, address to, uint256 totalMintFee) internal {
+        IERC1155LazyPayableClaim(mintData.extensionContract).mintBatch{value: totalMintFee}(
+            mintData.creatorContractAddress,
+            mintData.instanceId,
+            mintData.mintCount,
+            mintData.mintIndices,
+            mintData.merkleProofs,
+            address(this)
         );
-        IERC1155(creatorContractAddress).safeTransferFrom(address(this), to, claim.tokenId, mintCount, "");
+        IERC1155(mintData.creatorContractAddress).safeTransferFrom(address(this), to, tokenId, mintData.mintCount, "");
     }
 
     /// @notice Fallback function to receive ETH
