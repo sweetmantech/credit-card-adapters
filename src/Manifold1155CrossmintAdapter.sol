@@ -3,14 +3,16 @@ pragma solidity ^0.8.17;
 
 import {IERC1155LazyPayableClaim} from "./interfaces/IERC1155LazyPayableClaim.sol";
 import {IERC20} from "./interfaces/IERC20.sol";
+import {IERC1155} from "./interfaces/IERC1155.sol";
 import {IWETH9} from "./interfaces/IWETH9.sol";
 import {ISwapRouter02} from "./interfaces/uniswap/ISwapRouter02.sol";
 import {IQuoterV2} from "./interfaces/uniswap/IQuoterV2.sol";
 import {IUniswapV3Factory} from "./interfaces/uniswap/IUniswapV3Factory.sol";
 import {IUniswapV3Pool} from "./interfaces/uniswap/IUniswapV3Pool.sol";
+import "@openzeppelin/contracts/token/ERC1155/utils/ERC1155Holder.sol";
 
 /// @title Manifold1155CrossmintAdapter
-contract Manifold1155CrossmintAdapter {
+contract Manifold1155CrossmintAdapter is ERC1155Holder {
     event IncomingEthValue(uint256 price, uint256 fee, uint256 totalAmount);
 
     uint256 public constant MINT_FEE = 0.0005 ether;
@@ -83,9 +85,10 @@ contract Manifold1155CrossmintAdapter {
             emit IncomingEthValue(totalClaimPrice, totalMintFee, totalClaimPrice + totalMintFee);
         }
 
-        IERC1155LazyPayableClaim(extensionContract).mintBatch{value: 0.0005 ether}(
-            creatorContractAddress, instanceId, mintCount, mintIndices, merkleProofs, to
+        IERC1155LazyPayableClaim(extensionContract).mintBatch{value: totalMintFee}(
+            creatorContractAddress, instanceId, mintCount, mintIndices, merkleProofs, address(this)
         );
+        IERC1155(creatorContractAddress).safeTransferFrom(address(this), to, claim.tokenId, mintCount, "");
     }
 
     /// @notice Fallback function to receive ETH
