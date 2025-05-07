@@ -34,11 +34,7 @@ interface IZoraUniversalMinter {
     error INSUFFICIENT_VALUE(uint256 expectedValue, uint256 actualValue);
 
     // these are errors from Zora 1155Contracts, including them here will have them included in the abi, and allow them to get unwrapped/parsed by wagmi and can be decoded by viem.sh:
-    error UserExceedsMintLimit(
-        address user,
-        uint256 limit,
-        uint256 requestedAmount
-    );
+    error UserExceedsMintLimit(address user, uint256 limit, uint256 requestedAmount);
     error WrongValueSent();
     error SaleEnded();
     error SaleHasNotStarted();
@@ -99,11 +95,9 @@ interface IZoraUniversalMinter {
     /// @param _targets Addresses of contracts to call
     /// @param _calldatas Data to pass to the mint functions for each target
     /// @param _values Value to send to each target - must match the value required by the target's mint function.
-    function mintBatchWithoutFees(
-        address[] calldata _targets,
-        bytes[] calldata _calldatas,
-        uint256[] calldata _values
-    ) external payable;
+    function mintBatchWithoutFees(address[] calldata _targets, bytes[] calldata _calldatas, uint256[] calldata _values)
+        external
+        payable;
 
     /// Execute a mint call on a series a target ERC721 or ERC1155 contracts, then transfers the minted tokens to the calling account.
     /// Adds a mint fee to the msg.value sent to the contract.
@@ -116,13 +110,9 @@ interface IZoraUniversalMinter {
     /// @param _value Value to send to the target - must match the value required by the target's mint function.
     /// @param _tokensMinted Total number of tokens minted across all targets, used to calculate fees
     /// @param _finder Optional - address of finder that will receive a portion of the fees
-    function mint(
-        address _target,
-        bytes calldata _calldata,
-        uint256 _value,
-        uint256 _tokensMinted,
-        address _finder
-    ) external payable;
+    function mint(address _target, bytes calldata _calldata, uint256 _value, uint256 _tokensMinted, address _finder)
+        external
+        payable;
 
     /// Has a minter agent execute a transaction on behalf of the calling acccount.  The minter
     /// agent's address will be the same for the calling account as the address that was
@@ -130,11 +120,9 @@ interface IZoraUniversalMinter {
     /// the minter agent's contract address.
     /// @param _target Address of contract to call
     /// @param _calldata Calldata for arguments to call.
-    function forwardCallFromAgent(
-        address _target,
-        bytes calldata _calldata,
-        uint256 _additionalValue
-    ) external payable;
+    function forwardCallFromAgent(address _target, bytes calldata _calldata, uint256 _additionalValue)
+        external
+        payable;
 
     /// Withdraws any fees or rewards that have been allocated to the caller's address.  Fees can be withdrawn to any other specified address.
     /// @param to The address to withdraw to
@@ -147,11 +135,7 @@ interface IZoraUniversalMinter {
     /// @return zoraFee The fee that will be sent to the zora fee recipient
     /// @return finderReward The fee that will be sent to the finder
     /// @return requiredToSend The total value that must be sent to the contract, including fees
-    function fee(
-        uint256 _mintValue,
-        uint256 _tokensMinted,
-        address _finderAddress
-    )
+    function fee(uint256 _mintValue, uint256 _tokensMinted, address _finderAddress)
         external
         view
         returns (uint256 zoraFee, uint256 finderReward, uint256 requiredToSend);

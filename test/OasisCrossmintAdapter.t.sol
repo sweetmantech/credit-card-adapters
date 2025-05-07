@@ -7,8 +7,7 @@ import {ZoraDropMock} from "./mocks/ZoraDropMock.sol";
 
 contract OasisCrossmintAdapterTest is Test {
     OasisCrossmintAdapter public adapter;
-    address payable MULTICALL_3 =
-        payable(0xcA11bde05977b3631167028862bE2a173976CA11);
+    address payable MULTICALL_3 = payable(0xcA11bde05977b3631167028862bE2a173976CA11);
 
     function setUp() public {
         adapter = new OasisCrossmintAdapter(MULTICALL_3);

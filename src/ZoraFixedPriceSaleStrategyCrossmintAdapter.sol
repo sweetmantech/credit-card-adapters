@@ -31,7 +31,7 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
     ) public payable {
         IFixedPriceSaleStrategy.SaleConfig memory config =
             IFixedPriceSaleStrategy(priceFixedSaleStrategy).sale(tokenContract, tokenId);
-        
+
         // Validate sale is active
         if (block.timestamp < config.saleStart || block.timestamp > config.saleEnd) {
             revert SaleNotActive();
@@ -47,11 +47,7 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapter {
         bytes memory mintArgs = abi.encode(to, comment);
 
         IZoraCreator1155(tokenContract).mint{value: msg.value}(
-            IMinter1155(priceFixedSaleStrategy),
-            tokenId,
-            quantity,
-            new address[](0),
-            mintArgs
+            IMinter1155(priceFixedSaleStrategy), tokenId, quantity, new address[](0), mintArgs
         );
     }
 

@@ -17,11 +17,7 @@ contract ChillDropCrossmintAdapter {
     /// @param _target ERC721Drop contract address
     /// @param _quantity number of tokens
     /// @param _to recipient of tokens
-    function purchase(
-        address _target,
-        uint256 _quantity,
-        address _to
-    ) public payable {
+    function purchase(address _target, uint256 _quantity, address _to) public payable {
         IERC721Drop erc721 = IERC721Drop(_target);
         uint256 start = erc721.purchase{value: msg.value}(_quantity) + 1;
         for (uint256 i = start; i < start + _quantity; i++) {

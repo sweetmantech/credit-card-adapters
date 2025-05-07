@@ -25,9 +25,7 @@ contract ZoraDropMock is ERC721A {
     function _mintNFTs(address to, uint256 quantity) internal {
         uint256 MAX_MINT_BATCH_SIZE = 8;
         do {
-            uint256 toMint = quantity > MAX_MINT_BATCH_SIZE
-                ? MAX_MINT_BATCH_SIZE
-                : quantity;
+            uint256 toMint = quantity > MAX_MINT_BATCH_SIZE ? MAX_MINT_BATCH_SIZE : quantity;
             _mint({to: to, quantity: toMint});
             quantity -= toMint;
         } while (quantity > 0);

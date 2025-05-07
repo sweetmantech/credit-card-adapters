@@ -16,11 +16,7 @@ contract SoundCrossmintAdapter {
     /// @param _target Sound NFT contract address
     /// @param _quantity number of tokens
     /// @param _to recipient of tokens
-    function mint(
-        address _target,
-        uint256 _quantity,
-        address _to
-    ) public payable {
+    function mint(address _target, uint256 _quantity, address _to) public payable {
         ISound721A erc721 = ISound721A(_target);
         erc721.mint{value: msg.value}(_to, _quantity);
     }
@@ -28,12 +24,11 @@ contract SoundCrossmintAdapter {
     /**
      * Always returns `IERC721Receiver.onERC721Received.selector`.
      */
-    function onERC721Received(
-        address _operator,
-        address _from,
-        uint256 _tokenId,
-        bytes memory _data
-    ) external pure returns (bytes4) {
+    function onERC721Received(address _operator, address _from, uint256 _tokenId, bytes memory _data)
+        external
+        pure
+        returns (bytes4)
+    {
         return this.onERC721Received.selector;
     }
 }

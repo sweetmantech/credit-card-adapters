@@ -29,9 +29,8 @@ contract ZoraERC20MinterCrossmintAdapter {
         address mintReferral,
         string memory comment
     ) public {
-        IERC20Minter.SalesConfig memory config =
-            IERC20Minter(erc20Minter).sale(tokenContract, tokenId);
-        
+        IERC20Minter.SalesConfig memory config = IERC20Minter(erc20Minter).sale(tokenContract, tokenId);
+
         // Validate sale is active
         if (block.timestamp < config.saleStart || block.timestamp > config.saleEnd) {
             revert SaleNotActive();
@@ -42,7 +41,7 @@ contract ZoraERC20MinterCrossmintAdapter {
 
         // Transfer tokens from user to this contract
         require(IERC20(config.currency).transferFrom(msg.sender, address(this), totalPriceUSDC), "Transfer failed");
-        
+
         // Approve minter to spend tokens
         require(IERC20(config.currency).approve(erc20Minter, totalPriceUSDC), "Approval failed");
 

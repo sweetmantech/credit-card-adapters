@@ -10,5 +10,11 @@ interface IZoraCreator {
     /// @param quantity The quantity of tokens to mint
     /// @param minterArguments The arguments to pass to the minter
     /// @param mintReferral The referrer of the mint
-    function mintWithRewards(IMinter1155 minter, uint256 tokenId, uint256 quantity, bytes calldata minterArguments, address mintReferral) external payable;
+    function mintWithRewards(
+        IMinter1155 minter,
+        uint256 tokenId,
+        uint256 quantity,
+        bytes calldata minterArguments,
+        address mintReferral
+    ) external payable;
 }

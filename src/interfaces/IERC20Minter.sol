@@ -16,7 +16,7 @@ interface IERC20Minter {
         /// @notice ERC20 Currency address
         address currency;
     }
-    
+
     /// @notice Mints a token using an ERC20 currency, note the total value must have been approved prior to calling this function
     /// @param mintTo The address to mint the token to
     /// @param quantity The quantity of tokens to mint

@@ -39,7 +39,7 @@ contract ZoraUniversalMinterCrossmintAdapter {
         bytes[] memory _calldatas = new bytes[](_tokenCount);
         uint256[] memory _values = new uint256[](_tokenCount);
 
-        for(uint256 i = 0; i < _tokenCount; i++) {
+        for (uint256 i = 0; i < _tokenCount; i++) {
             _targets[i] = _target;
             _values[i] = _value;
         }
@@ -48,9 +48,7 @@ contract ZoraUniversalMinterCrossmintAdapter {
 
         IZoraUniversalMinter minter = IZoraUniversalMinter(_universalMinter);
         minter.mintBatchWithoutFees{value: msg.value}(
-            _targets,
-            generateCalldatas(_tokenCount, _minter, _referral, _to, _targets[0]),
-            _values
+            _targets, generateCalldatas(_tokenCount, _minter, _referral, _to, _targets[0]), _values
         );
     }
 
@@ -61,31 +59,22 @@ contract ZoraUniversalMinterCrossmintAdapter {
     /// @param to Address where the minted tokens should be sent.
     /// @param dropContractAddress Target contract address for minting.
     /// @return calldatas The array of calldata for minting each token.
-    function generateCalldatas(
-        uint256 count,
-        address minter,
-        address referral,
-        address to,
-        address dropContractAddress
-    ) public pure returns (bytes[] memory calldatas) {
+    function generateCalldatas(uint256 count, address minter, address referral, address to, address dropContractAddress)
+        public
+        pure
+        returns (bytes[] memory calldatas)
+    {
         calldatas = new bytes[](count);
         IZoraCreator zoraDrop = IZoraCreator(dropContractAddress);
         bytes4 selector = zoraDrop.mintWithRewards.selector;
 
         uint256 quantity = 1;
-        string memory comment = "MAGIC"; 
+        string memory comment = "MAGIC";
         bytes memory minterArguments = abi.encode(to, comment);
-        
+
         for (uint256 i = 0; i < count; i++) {
             uint256 tokenId = i + 1;
-            calldatas[i] = abi.encodeWithSelector(
-                selector,
-                minter,
-                tokenId,
-                quantity,
-                minterArguments,
-                referral
-            );
+            calldatas[i] = abi.encodeWithSelector(selector, minter, tokenId, quantity, minterArguments, referral);
         }
     }
 }

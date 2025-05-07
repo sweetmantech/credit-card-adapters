@@ -23,13 +23,7 @@ contract MockFixedPriceSaleStrategy {
         return saleConfig;
     }
 
-    function requestMint(
-        address,
-        uint256,
-        uint256,
-        uint256,
-        bytes memory
-    ) external view returns (bool) {
+    function requestMint(address, uint256, uint256, uint256, bytes memory) external view returns (bool) {
         require(!shouldRevert, "Mock: forced revert");
         return true;
     }
@@ -47,13 +41,11 @@ contract MockZoraCreator1155 {
         shouldRevert = _shouldRevert;
     }
 
-    function mint(
-        address minter,
-        uint256 tokenId,
-        uint256 quantity,
-        address[] calldata,
-        bytes calldata mintArgs
-    ) external payable returns (uint256) {
+    function mint(address minter, uint256 tokenId, uint256 quantity, address[] calldata, bytes calldata mintArgs)
+        external
+        payable
+        returns (uint256)
+    {
         require(!shouldRevert, "Mock: forced revert");
         lastMinter = minter;
         lastTokenId = tokenId;
@@ -82,11 +74,11 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
 
         // Get current block timestamp
         uint256 currentTime = block.timestamp;
-        
+
         // Setup default sale config with safe timestamp values
         IFixedPriceSaleStrategy.SaleConfig memory config = IFixedPriceSaleStrategy.SaleConfig({
-            saleStart: uint64(currentTime),  // Current time
-            saleEnd: uint64(currentTime + 1 hours),  // 1 hour from now
+            saleStart: uint64(currentTime), // Current time
+            saleEnd: uint64(currentTime + 1 hours), // 1 hour from now
             maxTokensPerAddress: 10,
             pricePerToken: PRICE_PER_TOKEN,
             fundsRecipient: address(this)
@@ -96,20 +88,15 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
 
     function test_Mint() public {
         uint256 totalPrice = PRICE_PER_TOKEN * QUANTITY;
-        
+
         adapter.mint{value: totalPrice}(
-            address(mockZora),
-            TOKEN_ID,
-            QUANTITY,
-            address(mockStrategy),
-            RECIPIENT,
-            "commented!"
+            address(mockZora), TOKEN_ID, QUANTITY, address(mockStrategy), RECIPIENT, "commented!"
         );
 
         assertEq(mockZora.lastTokenId(), TOKEN_ID);
         assertEq(mockZora.lastQuantity(), QUANTITY);
         assertEq(mockZora.lastMinter(), address(mockStrategy));
-        
+
         // Verify encoded recipient in mintArgs
         address decodedRecipient = abi.decode(mockZora.lastMintArgs(), (address));
         assertEq(decodedRecipient, RECIPIENT);
@@ -118,30 +105,20 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
     function test_RevertOnMintFailure() public {
         uint256 totalPrice = PRICE_PER_TOKEN * QUANTITY;
         mockZora.setShouldRevert(true);
-        
+
         vm.expectRevert("Mock: forced revert");
         adapter.mint{value: totalPrice}(
-            address(mockZora),
-            TOKEN_ID,
-            QUANTITY,
-            address(mockStrategy),
-            RECIPIENT,
-            "commented!"
+            address(mockZora), TOKEN_ID, QUANTITY, address(mockStrategy), RECIPIENT, "commented!"
         );
     }
 
     function test_RevertOnStrategyMintRequestFailure() public {
         uint256 totalPrice = PRICE_PER_TOKEN * QUANTITY;
         mockStrategy.setShouldRevert(true);
-        
+
         vm.expectRevert("Mock: forced revert");
         adapter.mint{value: totalPrice}(
-            address(mockZora),
-            TOKEN_ID,
-            QUANTITY,
-            address(mockStrategy),
-            RECIPIENT,
-            "commented!"
+            address(mockZora), TOKEN_ID, QUANTITY, address(mockStrategy), RECIPIENT, "commented!"
         );
     }
 
@@ -149,4 +126,4 @@ contract ZoraFixedPriceSaleStrategyCrossmintAdapterTest is Test {
         payable(address(adapter)).transfer(1 ether);
         assertEq(address(adapter).balance, 1 ether);
     }
-} 
+}

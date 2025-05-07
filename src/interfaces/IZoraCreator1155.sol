@@ -10,5 +10,11 @@ interface IZoraCreator1155 {
     /// @param quantity The quantity of tokens to mint
     /// @param rewardsRecipients The addresses of rewards arguments - rewardsRecipients[0] = mintReferral, rewardsRecipients[1] = platformReferral
     /// @param minterArguments The arguments to pass to the minter
-    function mint(IMinter1155 minter, uint256 tokenId, uint256 quantity, address[] calldata rewardsRecipients, bytes calldata minterArguments) external payable;
+    function mint(
+        IMinter1155 minter,
+        uint256 tokenId,
+        uint256 quantity,
+        address[] calldata rewardsRecipients,
+        bytes calldata minterArguments
+    ) external payable;
 }

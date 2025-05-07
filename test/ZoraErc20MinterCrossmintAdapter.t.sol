@@ -111,38 +111,22 @@ contract ZoraERC20MinterCrossmintAdapterTest is Test {
             fundsRecipient: address(this)
         });
         mockMinter.setSaleConfig(config);
-        
+
         // Mint tokens to the test contract and approve adapter
         mockToken.mint(address(this), TOTAL_PRICE);
         mockToken.approve(address(adapter), TOTAL_PRICE);
     }
 
     function test_Mint() public {
-        adapter.mint(
-            address(mockMinter),
-            RECIPIENT,
-            QUANTITY,
-            address(this),
-            TOKEN_ID,
-            address(0),
-            "Test mint"
-        );
+        adapter.mint(address(mockMinter), RECIPIENT, QUANTITY, address(this), TOKEN_ID, address(0), "Test mint");
     }
 
     function test_RevertOnInsufficientFunds() public {
         // First, reduce our token balance to simulate insufficient funds
         mockToken.transfer(address(0x1), TOTAL_PRICE - 1);
-        
+
         vm.expectRevert("Insufficient balance");
-        adapter.mint(
-            address(mockMinter),
-            RECIPIENT,
-            QUANTITY,
-            address(this),
-            TOKEN_ID,
-            address(0),
-            "Test mint"
-        );
+        adapter.mint(address(mockMinter), RECIPIENT, QUANTITY, address(this), TOKEN_ID, address(0), "Test mint");
     }
 
     function test_RevertOnSaleNotActive() public {
@@ -158,14 +142,6 @@ contract ZoraERC20MinterCrossmintAdapterTest is Test {
         mockMinter.setSaleConfig(config);
 
         vm.expectRevert(abi.encodeWithSelector(ZoraERC20MinterCrossmintAdapter.SaleNotActive.selector));
-        adapter.mint(
-            address(mockMinter),
-            RECIPIENT,
-            QUANTITY,
-            address(this),
-            TOKEN_ID,
-            address(0),
-            "Test mint"
-        );
+        adapter.mint(address(mockMinter), RECIPIENT, QUANTITY, address(this), TOKEN_ID, address(0), "Test mint");
     }
 }
