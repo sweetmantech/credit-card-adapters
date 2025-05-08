@@ -29,14 +29,9 @@ interface IERC1155LazyPayableClaim is ILazyPayableClaim {
         uint32 walletMax;
         uint48 startDate;
         uint48 endDate;
-        StorageProtocol storageProtocol;
-        bytes32 merkleRoot;
-        string location;
         uint256 tokenId;
         uint256 cost;
-        address payable paymentReceiver;
         address erc20;
-        address signingAddress;
     }
 
     /**
