@@ -1,6 +1,6 @@
 {
     "ZoraFixedPriceSaleStrategyCrossmintAdapter": "0x8409abdf1e1e321faa9aadaa9a99cb7d3ff51917",
     "ZoraERC20MinterCrossmintAdapter": "0x5A6540cf3409EeC6bAeF8B5Abac6b4F78a55127d",
-    "ManifoldCrossmintAdapter": "0x2680E7D3B24163419F219e1567d1085Dcc2c5cDb",
+    "ManifoldCrossmintAdapter": "0x82A300a5753e69e3999F33DEC7FBD9a3024Bc827 ",
     "HypersubCrossmintAdapter": "0xF9A807061b1D82C72B396f5EE649C9dBc9426EC7"
 }
