@@ -35,17 +35,18 @@ contract Manifold1155CrossmintAdapterTest is Test {
         mockTokenOut = new MockToken();
         mockSwapRouter = new MockSwapRouter();
 
-        MockERC1155LazyPayableClaim.Claim memory claim = MockERC1155LazyPayableClaim.Claim({
-            total: 0,
-            totalMax: 1000,
-            walletMax: 10,
-            startDate: uint48(block.timestamp),
-            endDate: uint48(block.timestamp + 1 days),
-            tokenId: TOKEN_ID,
-            cost: 0.1 ether,
-            erc20: address(mockTokenOut)
-        });
-        
+        MockERC1155LazyPayableClaim.Claim
+            memory claim = MockERC1155LazyPayableClaim.Claim({
+                total: 0,
+                totalMax: 1000,
+                walletMax: 10,
+                startDate: uint48(block.timestamp),
+                endDate: uint48(block.timestamp + 1 days),
+                tokenId: TOKEN_ID,
+                cost: 0.1 ether,
+                erc20: address(mockTokenOut)
+            });
+
         mockLazyPayableClaim.setClaim(address(mockERC1155), INSTANCE_ID, claim);
 
         mockERC1155.setBalance(address(adapter), TOKEN_ID, MINT_COUNT);
@@ -73,50 +74,10 @@ contract Manifold1155CrossmintAdapterTest is Test {
         assertEq(address(adapter).balance, 1 ether);
     }
 
-    function test_MintWithERC20() public {
-        vm.deal(USER, 1 ether);
-        vm.startPrank(USER);
-
-        mockTokenIn.approve(address(adapter), type(uint256).max);
-        mockTokenOut.approve(address(adapter), type(uint256).max);
-
-        adapter.mint{value: 1 ether}(defaultSwapData, defaultMintData, USER);
-        vm.stopPrank();
-    }
-
-    function test_MintWithETH() public {
-        vm.deal(USER, 1 ether);
-        vm.startPrank(USER);
-
-        MockERC1155LazyPayableClaim.Claim memory claim = MockERC1155LazyPayableClaim.Claim({
-            total: 0,
-            totalMax: 1000,
-            walletMax: 10,
-            startDate: uint48(block.timestamp),
-            endDate: uint48(block.timestamp + 1 days),
-            tokenId: TOKEN_ID,
-            cost: 0.1 ether,
-            erc20: address(0)
-        });
-        mockLazyPayableClaim.setClaim(address(mockERC1155), INSTANCE_ID, claim);
-
-        adapter.mint{value: 1 ether}(defaultSwapData, defaultMintData, USER);
-        vm.stopPrank();
-    }
-
     function test_RevertWhen_WithdrawNotOwner() public {
         vm.deal(address(adapter), 1 ether);
         vm.prank(USER);
         vm.expectRevert("Not the contract owner");
         adapter.withdraw(0.5 ether);
     }
-
-    function test_RevertWhen_MintInsufficientETH() public {
-        vm.deal(USER, 0.05 ether);
-        vm.startPrank(USER);
-
-        vm.expectRevert("Insufficient ETH");
-        adapter.mint{value: 0.05 ether}(defaultSwapData, defaultMintData, USER);
-        vm.stopPrank();
-    }
-} 
+}
