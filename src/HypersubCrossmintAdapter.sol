@@ -29,58 +29,88 @@ contract HypersubCrossmintAdapter is ERC721Holder {
         owner = msg.sender;
     }
 
-    function mint(SwapData memory swapData, address subscription, uint16 tierId, address to) public payable {
+    function mint(
+        SwapData memory swapData,
+        address subscription,
+        uint16 tierId,
+        address to
+    ) public payable {
         uint256 balanceOf = ISTPV2(subscription).balanceOf(to);
         ContractView memory detail = ISTPV2(subscription).contractDetail();
         TierLib.State memory tier = ISTPV2(subscription).tierDetail(tierId);
 
-        uint256 price = balanceOf > 0 ? tier.params.pricePerPeriod : tier.params.initialMintPrice;
+        uint256 tokensIn = balanceOf > 0
+            ? tier.params.pricePerPeriod
+            : tier.params.initialMintPrice + tier.params.pricePerPeriod;
         bool isErc20Token = detail.currency != address(0);
-        
+
         if (isErc20Token) {
-            uint256 amountIn = handleErc20Mint(swapData, detail.currency, price);
-            IERC20(detail.currency).approve(subscription, price);
+            uint256 amountIn = handleErc20Mint(
+                swapData,
+                detail.currency,
+                tokensIn
+            );
+            IERC20(detail.currency).approve(subscription, tokensIn);
             require(msg.value > amountIn, "Insufficient ETH");
         } else {
-            require(msg.value > price, "Insufficient ETH");
+            require(msg.value > tokensIn, "Insufficient ETH");
         }
-        ISTPV2(subscription).mintFor{value: isErc20Token ? 0 : price}(to, price);
+        ISTPV2(subscription).mintFor{value: isErc20Token ? 0 : tokensIn}(
+            to,
+            tokensIn
+        );
     }
 
-    function handleErc20Mint(SwapData memory swapData, address tokenOut, uint256 amountOut)
-        internal
-        returns (uint256)
-    {
-        address pool = IUniswapV3Factory(swapData.swapFactory).getPool(swapData.tokenIn, tokenOut, swapData.fee);
+    function handleErc20Mint(
+        SwapData memory swapData,
+        address tokenOut,
+        uint256 amountOut
+    ) internal returns (uint256) {
+        address pool = IUniswapV3Factory(swapData.swapFactory).getPool(
+            swapData.tokenIn,
+            tokenOut,
+            swapData.fee
+        );
         uint160 liquidity = IUniswapV3Pool(pool).liquidity();
 
-        IQuoterV2.QuoteExactOutputSingleParams memory quoteExactOutputParams = IQuoterV2.QuoteExactOutputSingleParams({
-            tokenIn: swapData.tokenIn,
-            tokenOut: tokenOut,
-            amount: amountOut,
-            fee: swapData.fee,
-            sqrtPriceLimitX96: liquidity
-        });
+        IQuoterV2.QuoteExactOutputSingleParams
+            memory quoteExactOutputParams = IQuoterV2
+                .QuoteExactOutputSingleParams({
+                    tokenIn: swapData.tokenIn,
+                    tokenOut: tokenOut,
+                    amount: amountOut,
+                    fee: swapData.fee,
+                    sqrtPriceLimitX96: liquidity
+                });
         uint256 amountIn;
         uint160 sqrtPriceX96After;
         uint32 initializedTicksCrossed;
         uint256 gasEstimate;
 
-        (amountIn, sqrtPriceX96After, initializedTicksCrossed, gasEstimate) =
-            IQuoterV2(swapData.quoterV2).quoteExactOutputSingle(quoteExactOutputParams);
+        (
+            amountIn,
+            sqrtPriceX96After,
+            initializedTicksCrossed,
+            gasEstimate
+        ) = IQuoterV2(swapData.quoterV2).quoteExactOutputSingle(
+            quoteExactOutputParams
+        );
 
         require(msg.value >= amountIn, "Insufficient ETH");
         IWETH9(swapData.tokenIn).approve(swapData.swapRouter, amountIn);
-        ISwapRouter02.ExactOutputSingleParams memory params = ISwapRouter02.ExactOutputSingleParams({
-            tokenIn: swapData.tokenIn,
-            tokenOut: tokenOut,
-            fee: swapData.fee,
-            recipient: address(this),
-            amountOut: amountOut,
-            amountInMaximum: amountIn,
-            sqrtPriceLimitX96: liquidity
-        });
-        ISwapRouter02(swapData.swapRouter).exactOutputSingle{value: amountIn}(params);
+        ISwapRouter02.ExactOutputSingleParams memory params = ISwapRouter02
+            .ExactOutputSingleParams({
+                tokenIn: swapData.tokenIn,
+                tokenOut: tokenOut,
+                fee: swapData.fee,
+                recipient: address(this),
+                amountOut: amountOut,
+                amountInMaximum: amountIn,
+                sqrtPriceLimitX96: liquidity
+            });
+        ISwapRouter02(swapData.swapRouter).exactOutputSingle{value: amountIn}(
+            params
+        );
         return amountIn;
     }
 
