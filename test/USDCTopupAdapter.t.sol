@@ -85,7 +85,7 @@ contract USDCTopupAdapterTest is Test {
 
         // USER calls topup to send 2 USDC to RECIPIENT
         vm.prank(USER);
-        adapter.topup(RECIPIENT, address(usdc), 2);
+        adapter.topup(RECIPIENT, address(usdc), "2");
 
         // Amount scaled to 6 decimals => 2_000_000
         assertEq(usdc.balanceOf(RECIPIENT), 2_000_000);
@@ -99,7 +99,22 @@ contract USDCTopupAdapterTest is Test {
 
         vm.prank(USER);
         vm.expectRevert("ERC20: insufficient allowance");
-        adapter.topup(RECIPIENT, address(usdc), 2); // needs 2 USDC
+        adapter.topup(RECIPIENT, address(usdc), "2"); // needs 2 USDC
+    }
+
+    function test_Topup_TransfersDecimalUSDC() public {
+        // USER approves adapter to pull USDC
+        vm.prank(USER);
+        usdc.approve(address(adapter), type(uint256).max);
+
+        uint256 userBefore = usdc.balanceOf(USER);
+
+        // 0.111 USDC => 111_000 units
+        vm.prank(USER);
+        adapter.topup(RECIPIENT, address(usdc), "0.111");
+
+        assertEq(usdc.balanceOf(RECIPIENT), 111_000);
+        assertEq(usdc.balanceOf(USER), userBefore - 111_000);
     }
 }
 
